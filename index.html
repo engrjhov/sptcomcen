@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Planning ComCen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Public+Sans:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  /* Responsive sidebar branding */
+  .sidebar {
+    container-type: inline-size;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-brand .nav-logo {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-brand .nav-name {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.15;
+    font-size: clamp(10px, 7.5cqw, 18px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* When the sidebar is collapsed, keep the logo only. */
+  @container (max-width: 110px) {
+    .sidebar-brand {
+      justify-content: center;
+    }
+
+    .sidebar-brand .nav-name {
+      display: none;
+    }
+  }
+
+  /* Give the brand more room on wider sidebars. */
+  @container (min-width: 280px) {
+    .sidebar-brand .nav-name {
+      font-size: clamp(14px, 6cqw, 18px);
+    }
+  }
+</style>
+
+</head>
+<body>
+
+<!-- Floating sticky layer (always on top, below modals) -->
+<div id="sticky-layer"></div>
+
+<!-- NAV -->
+<div class="app-container">
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <div class="nav-logo" style="flex-shrink:0">J</div>
+      <div class="nav-name">Space Planning ComCen</div>
+    </div>
+    
+    <div class="sidebar-links">
+      <button class="sidebar-btn" data-page="page-dashboard" data-label="Dashboard">
+        <span class="ico">📊</span><span class="btn-label">Dashboard</span>
+      </button>
+      <button class="sidebar-btn active" data-page="page-overview" data-label="Today">
+        <span class="ico">🏠</span><span class="btn-label">Today</span>
+      </button>
+      <button class="sidebar-btn" data-page="page-planner" data-label="Planner">
+        <span class="ico">📅</span><span class="btn-label">Planner</span>
+      </button>
+      <button class="sidebar-btn" data-page="page-board" data-label="Kanban">
+        <span class="ico">📋</span><span class="btn-label">Kanban</span>
+      </button>
+      <button class="sidebar-btn" data-page="page-reminders" data-label="Reminders">
+        <span class="ico">📌</span><span class="btn-label">Reminders</span>
+      </button>
+      <button class="sidebar-btn" data-page="page-directories" data-label="Resources">
+        <span class="ico">📁</span><span class="btn-label">Resources</span>
+      </button>
+      <button class="sidebar-btn" data-page="page-people" data-label="People">
+        <span class="ico">👥</span><span class="btn-label">People</span>
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <!-- Sync status — clickable to manually sync -->
+      <div class="sync-block" id="sync-block" onclick="manualSync()" title="Click to sync now">
+        <!-- Expanded view -->
+        <div class="sync-block-top">
+          <div class="nav-dot live" id="sync-dot"></div>
+          <span class="sync-status-label" id="sync-text">System Live</span>
+          <span style="font-size:9px;color:var(--muted);margin-left:auto">↻</span>
+        </div>
+        <div class="sync-time-line" id="sync-time-detail">Not yet synced</div>
+        <!-- Collapsed view: dot + reload side by side, centered -->
+        <div class="sync-collapsed-view">
+          <div class="nav-dot live" id="sync-dot-collapsed"></div>
+          <span style="font-size:13px;color:var(--muted)">↻</span>
+        </div>
+      </div>
+
+      <!-- Date + theme toggle -->
+      <div class="sidebar-controls">
+        <button class="icon-toggle" id="theme-toggle">🌙</button>
+        <div class="nav-date-small" id="nav-date-display"></div>
+      </div>
+
+      <!-- Collapse toggle — disappears on mobile where sidebar is off-canvas -->
+      <button class="sidebar-collapse-row-btn" id="collapse-btn" title="Toggle sidebar width">
+        <span id="collapse-icon">|&lt;</span>
+        <span class="btn-label" style="font-size:11px;font-weight:500"> Collapse sidebar</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="mobile-header">
+    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+    <div class="nav-name">Jhov's <span>Dashboard</span></div>
+  </div>
+
+  <main class="main-content" id="main-content">
+
+
+<div class="page" id="page-dashboard"></div>
+<div class="page active" id="page-overview"></div>
+<div class="page" id="page-planner"></div>
+<div class="page" id="page-board"></div>
+<div class="page" id="page-directories"></div>
+<div class="page" id="page-reminders"></div>
+<div class="page" id="page-people"></div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+</main>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fab-wrap" id="fabWrap">
+  <div class="fab-options" id="fabOptions">
+    <div class="fab-option" onclick="closeFab();openTEEModal(null,'task')">
+      <span class="fab-option-icon">📋</span>
+      <span class="fab-option-label">New Task</span>
+    </div>
+    <div class="fab-option" onclick="closeFab();openTEEModal(null,'event')">
+      <span class="fab-option-icon">📆</span>
+      <span class="fab-option-label">New Event</span>
+    </div>
+    <div class="fab-option" onclick="closeFab();openTEEModal(null,'entry')">
+      <span class="fab-option-icon">📝</span>
+      <span class="fab-option-label">New Entry</span>
+    </div>
+    <div class="fab-option" onclick="closeFab();openPinnedNoteModal()">
+      <span class="fab-option-icon">📌</span>
+      <span class="fab-option-label">New Note</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabMain" onclick="toggleFab()" title="Quick Add">+</button>
+</div>
+
+<script src="js/01-constants-and-colors.js"></script>
+<script src="js/02-person-detail-modal.js"></script>
+<script src="js/03-data-sync-and-parsing.js"></script>
+<script src="js/04-render-all-chip-badge-system.js"></script>
+<script src="js/05-status-priority-engine.js"></script>
+<script src="js/06-tee-form-dropdowns.js"></script>
+<script src="js/07-people-picker.js"></script>
+<script src="js/08-assignee-and-person-helpers.js"></script>
+<script src="js/09-page-people.js"></script>
+<script src="js/10-page-overview.js"></script>
+<script src="js/11-page-planner.js"></script>
+<script src="js/12-page-reminders.js"></script>
+<script src="js/13-sticky-notes.js"></script>
+<script src="js/14-page-dashboard.js"></script>
+<script src="js/15-page-kanban.js"></script>
+<script src="js/16-page-resources.js"></script>
+<script src="js/17-nav-filters-fab-tags.js"></script>
+<script src="js/18-tee-detail-view.js"></script>
+<script src="js/19-tee-add-edit-modal.js"></script>
+<script src="js/20-tee-links-editor.js"></script>
+<script src="js/21-tee-delete-and-people-modals.js"></script>
+<script src="js/22-kanban-dnd-nav-theme-init.js"></script>
+
+<!--
+================================================================
+  GOOGLE APPS SCRIPT (v4 — Unified TEE + all sheets)
+  Paste into: Extensions → Apps Script → Deploy as Web App
+  Execute as: Me | Access: Anyone
+
+  IMPORTANT — Sheet column headers must match EXACTLY:
+
+  📅 Unified TEE Entries → ID, Type, Title, Description, Date, Due Date, Start Date,
+                            Time, End Time, Status, Priority, Category, Project,
+                            Department, Assignees, Progress %, Tags, Notes, Color, Recurrence
+
+  📦 TEE Archive         → same columns as above + Archived Date, Archived By
+
+  📝 Stickies            → ID, Text, ColorIdx, X, Y, Float, Pinned
+
+  📁 Folders             → ID, Name, URL, Description
+  👤 Contacts            → ID, Name, Position, Phone, Email
+  📍 Locations           → ID, Name, Address, MapURL, Notes
+  👥 People              → ID, Name, Role, Color, Photo
+
+  COLUMN RENAME CHECKLIST (if upgrading from earlier version):
+    • "Assigned To" → rename to "Assignees" in both TEE sheets
+    • Add "Photo" column (E) to People sheet if not present
+================================================================
+
+function doGet(e)  { return handleRequest(e, 'GET');  }
+function doPost(e) { return handleRequest(e, 'POST'); }
+
+// Columns that contain date values — returned as YYYY-MM-DD strings
+const DATE_COLUMNS = ['Date', 'Due Date', 'Start Date', 'Archived Date'];
+// Columns that contain time values — returned as HH:MM strings
+const TIME_COLUMNS = ['Time', 'End Time'];
+
+// Apps Script / Google Sheets date values are not always reliable with instanceof Date.
+// This checks for Date-like objects by duck-typing instead.
+function isDateLike(value) {
+  return value &&
+    typeof value === 'object' &&
+    typeof value.getFullYear === 'function' &&
+    typeof value.getMonth   === 'function' &&
+    typeof value.getDate    === 'function';
+}
+
+function formatCell(header, value, displayValue) {
+  // TIME columns: always use the display value (e.g. "11:45").
+  // This bypasses all timezone issues completely.
+  if (TIME_COLUMNS.includes(header)) {
+    if (displayValue && /^\d{1,2}:\d{2}/.test(displayValue)) {
+      return displayValue.substring(0, 5);
+    }
+    // Fallback: numeric fraction of a day.
+    if (typeof value === 'number') {
+      var totalMins = Math.round(value * 24 * 60);
+      var h   = Math.floor(totalMins / 60) % 24;
+      var min = totalMins % 60;
+      return String(h).padStart(2,'0') + ':' + String(min).padStart(2,'0');
+    }
+    return '';
+  }
+  // DATE columns: normalize to YYYY-MM-DD using sheet-local date components.
+  if (DATE_COLUMNS.includes(header) && isDateLike(value)) {
+    var y = value.getFullYear();
+    var m = String(value.getMonth() + 1).padStart(2, '0');
+    var d = String(value.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+  // P0-BUG002: Non-date columns whose cells were auto-coerced to Date-like
+  // objects by Google Sheets must return the visible display text, not an
+  // ISO string. Using instanceof Date alone was not reliable; isDateLike()
+  // duck-types instead.
+  if (isDateLike(value)) {
+    return displayValue || '';
+  }
+  return value;
+}
+
+function handleRequest(e, method) {
+  try {
+    if (method === 'GET') {
+      const action    = e.parameter.action;
+      const sheetName = e.parameter.sheet;
+      if (!sheetName) throw new Error('Missing sheet');
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+      if (!sheet) throw new Error('Sheet not found: ' + sheetName);
+
+      if (action === 'getAll') {
+        const range = sheet.getDataRange();
+        const values = range.getValues();
+        const displayValues = range.getDisplayValues();
+
+        if (values.length < 2) return output({ ok: true, data: [] });
+
+        const headers = values[0];
+        const data = values.slice(1)
+          .map((row, rowIdx) => ({ row, display: displayValues[rowIdx + 1] }))
+          .filter(({ row }) => row.some(cell => cell !== ''))
+          .map(({ row, display }) => {
+            const obj = {};
+            headers.forEach((h, i) => {
+              obj[h] = formatCell(h, row[i], display[i]);
+            });
+            return obj;
+          });
+
+        return output({ ok: true, data });
+      }
+
+      throw new Error('Invalid GET action');
+    }
+
+    if (method === 'POST') {
+      const body = JSON.parse(e.postData.contents);
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      let sheet = ss.getSheetByName(body.sheet);
+      // The accomplishment log is created automatically on first write so
+      // the owner does not have to manually add a new tab before deploying
+      // this version.
+      if (!sheet && body.sheet === '📈 Subtask Accomplishments') {
+        sheet = ss.insertSheet(body.sheet);
+        sheet.appendRow([
+          'Accomplishment ID','Accomplished At','TEE ID','Record Type',
+          'Record Title','Store Code','Store Name','Category','Assignment ID',
+          'Subtask','Step Order','Assigned To'
+        ]);
+      }
+      if (!sheet) throw new Error('Sheet not found: ' + body.sheet);
+
+      if (body.action === 'upsert') {
+        const headers   = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        const idField   = headers[0];
+        const item      = body.data;
+        const id        = item[idField];
+        const lastRow   = Math.max(sheet.getLastRow() - 1, 1);
+        const rows      = sheet.getRange(2, 1, lastRow, 1).getValues().flat();
+        const rowIndex  = rows.indexOf(id);
+        const rowData   = headers.map(h => item[h] !== undefined ? item[h] : '');
+
+        if (rowIndex >= 0) {
+          sheet.getRange(rowIndex + 2, 1, 1, rowData.length).setValues([rowData]);
+        } else {
+          sheet.appendRow(rowData);
+        }
+
+        return output({ ok: true });
+      }
+
+      if (body.action === 'delete') {
+        const id       = body.id;
+        const lastRow  = Math.max(sheet.getLastRow() - 1, 1);
+        const rows     = sheet.getRange(2, 1, lastRow, 1).getValues().flat();
+        const rowIndex = rows.indexOf(id);
+
+        if (rowIndex >= 0) sheet.deleteRow(rowIndex + 2);
+
+        return output({ ok: true });
+      }
+
+      throw new Error('Invalid POST action');
+    }
+  } catch (err) {
+    return output({ ok: false, error: err.message });
+  }
+}
+
+function output(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+================================================================
+-->
+
+
+
+
+<script id="dashboard-task-drive-script" src="js/23-dashboard-task-drive.js"></script>
+
+</body>
+</html>
